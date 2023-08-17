@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
+import {
+  getStorage,
+  ref,
+  uploadBytesResumable,
+  getDownloadURL,
+} from "@firebase/storage";
 import { Line } from "rc-progress";
-import styled from "styled-components"; 
+import styled from "styled-components";
 
 const Container = styled.div`
   width: 100%;
@@ -19,24 +24,13 @@ const Form = styled.form`
   gap: 10px;
 `;
 
-const Label = styled.label`
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-`;
-
-const Input = styled.input`
-  padding: 8px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-`;
-
 const Button = styled.button`
-  background-color: #FFC619;
+  width: 10rem;
+  background-color: #ffc619;
   color: white;
   border: none;
   padding: 10px;
-  border-radius: 5px;
+  border-radius: 10px;
   cursor: pointer;
 `;
 
@@ -66,8 +60,6 @@ const ImageUploader = () => {
   const [photoURL, setPhotosURL] = useState([]); // 업로드 완료된 사진 링크들
   const [progress, setProgress] = useState(0); // 업로드 진행상태
 
-
-  
   // 파일 선택시 파일리스트 상태 변경해주는 함수
   const handleImageChange = (e) => {
     for (const image of e.target.files) {
@@ -93,7 +85,11 @@ const ImageUploader = () => {
 
           // 업로드 진행률을 모니터링, 업로드 진행률 퍼센트로 상태 지정
           task.on("state_changed", (snapshot) => {
-            setProgress(Math.round((snapshot.bytesTransferred / snapshot.totalBytes) * 100));
+            setProgress(
+              Math.round(
+                (snapshot.bytesTransferred / snapshot.totalBytes) * 100
+              )
+            );
           });
 
           const url = await getDownloadURL(storageRef);
@@ -112,30 +108,20 @@ const ImageUploader = () => {
 
   return (
     <Container>
-      <Form onSubmit={(e) => handleImageUpload(e, files)}>
-        {/* 주소 입력 필드
-        <Label>
-          주소:
-          <Input
-            type="text"
-            value={address}
-            onChange={handleAddressChange}
-            placeholder="주소를 입력하세요"
-          />
-        </Label>
-        <Address />
+      <Form>
         {/* rc-progress의 Line 컴포넌트로 파일 업로드 상태 표시 */}
-        <Line percent={progress} strokeWidth={4} strokeColor="#ff567a" />
-        <Label>
-          파일 선택:
-          <Input
+        <Line percent={progress} strokeWidth={3} strokeColor="#eeeeee" />
+        <label>
+          <input
             multiple
             accept="image/*"
             type="file"
             onChange={handleImageChange}
           />
-        </Label>
-        <Button type="submit">{isUploading ? "업로드 중..." : "업로드"}</Button>
+        </label>
+        <Button type="submit" onClick={(e) => handleImageUpload(e, files)}>
+          {isUploading ? "업로드 중..." : "업로드"}
+        </Button>
       </Form>
       {/* 업로드된 사진 목록 */}
       <ImageList>
