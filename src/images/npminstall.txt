@@ -1,0 +1,16 @@
+리액트 npm install
+
+
+npm install classnames --save   
+npm install --save @types/classnames
+
+npm install react@latest             
+npm install react-dom@latest     
+
+npx create-react-app api-integrate   
+cd api-integrate   
+npm add axios    
+npm install axios   
+
+npm install react-daum-postcode 
+npm install react-kakao-maps       

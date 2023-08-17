@@ -1,0 +1,49 @@
+
+input[type="text"] {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+   margin-bottom: 10px;
+  width: 100%;
+  padding: 10px;
+  font-size: 15px;
+  border: 1px solid #ccc;
+  border-radius: 3px;
+}
+
+button[type="button"] {
+ margin-right: 5px;
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  font-weight: bold;
+}
+
+button[type="button"].add-button {
+margin: 20px 0;
+  background-color: #FFA500; /* 목록 추가 버튼의 색상 */
+}
+
+button[type="button"].add-button:hover {
+  background-color: #FFC619; /* 목록 추가 버튼의 hover 색상 */
+}
+
+button[type="button"].update-button {
+   margin-right: 5px;
+  background-color: #001A7D; /* 수정 버튼의 색상 */
+}
+
+button[type="button"].update-button:hover {
+  background-color: #0029FF; /* 수정 버튼의 hover 색상 */
+}
+
+button[type="button"].delete-button {
+ 
+  background-color: #FF0B5B; /* 삭제 버튼의 색상 */
+}
+
+button[type="button"].delete-button:hover {
+  background-color: #FF196C; /* 삭제 버튼의 hover 색상 */
+}
