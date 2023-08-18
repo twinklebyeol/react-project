@@ -10,13 +10,14 @@ import {
   updateDoc,
   deleteDoc,
 } from "@firebase/firestore";
-// collection : 테이블 선택하는 기능
 import { useEffect, useState } from "react";
 import YumHead from "./component/YumHead";
+
+import ReactDOM from 'react-dom';
 import YumTemplate from "./component/YumTemplate";
 import styled, { createGlobalStyle, css } from "styled-components";
 import { MdAdd } from "react-icons/md";
-import ImageUploader from "./ImageUploader";
+import AddressSearch from "./AddressSearch";
 
 const GlobalStyle = createGlobalStyle`
   body {
@@ -30,6 +31,7 @@ const ListContainer = styled.div`
   flex-wrap: wrap;
   justify-content: center;
 `;
+
 const ListEntry = styled.div`
   font-family: "Nanum Gothic", sans-serif;
   /* Add fixed width and height for each card */
@@ -178,7 +180,7 @@ const InputButton3 = styled.button`
   font-size: 15px;
   background: #000000;
   color: white;
-  margin: 0; /* Adjusted margin */
+  margin: 0;
   padding: 10px;
   cursor: pointer;
   border-radius: 10px;
@@ -187,14 +189,14 @@ const InputButton3 = styled.button`
     background: #ffbf19;
   }
 `;
-const InputButton4 = styled.button`
+const InputButton4 = styled.label`
   width: 100px;
   border: 0;
   outline: none;
   font-size: 15px;
   background: #000000;
   color: white;
-  margin: 0; /* Adjusted margin */
+  margin: 0;
   padding: 10px;
   cursor: pointer;
   border-radius: 10px;
@@ -210,7 +212,8 @@ const InputButton5 = styled.button`
   font-size: 15px;
   background: #ffc619;
   color: white;
-  margin: 0; /* Adjusted margin */
+  margin
+  margin: 0;
   padding: 10px;
   cursor: pointer;
   border-radius: 10px;
@@ -220,79 +223,55 @@ const InputButton5 = styled.button`
   }
 `;
 
+
+
+
+
 function Yumpage() {
   const [open, setOpen] = useState(false);
-  const [showImageUploader, setShowImageUploader] = useState(false); // 사진첨부 기능 보여줄지 여부
-  const onToggle = () => setOpen(!open); // Toggle the state when the button is clicked
-
-  // 렌더링 상태를 체크하기 위한 state 추가
+  const [postcodeOpen, setPostcodeOpen] = useState(false);
+  const [selectedAddress, setSelectedAddress] = useState("");
   const [changed, setChanged] = useState(false);
-
-  // 추가할 데이터를 저장할 state 생성
-
   var [newList, setNewList] = useState("");
   const [imageUrl, setImageUrl] = useState("");
-  const [imageUploaderVisible, setImageUploaderVisible] = useState(false);
-  // console.log(newList)
-
-  // 데이터를 저장할 state 생성
   var [yums, setList] = useState([]);
-
-  // 데이터베이스 연결 객체 생성
   const yumsCollectionRef = collection(db, "yums");
 
   useEffect(() => {
     const getLists = async () => {
-      // getDocs(DB 연결객체)로 데이터 가져오기
-      // query(DB 연결객체, orderBy("기준열", "정렬 방식"))
       const data = await getDocs(
         query(yumsCollectionRef, orderBy("timeStamp", "desc"))
       );
-      // console.log(data)
       setList(
-        data.docs.map(
-          //
-          (doc) => ({ ...doc.data(), id: doc.id })
-        )
+        data.docs.map((doc) => ({ ...doc.data(), id: doc.id }))
       );
-      // console.log(todos)
     };
 
     getLists();
     setChanged(false);
-  }, [changed]); //새로고침하면 나옴
-  // })
+  }, [changed]);
 
-  // DB에 이벽할 날짜 생성
   const date = new Date();
   const now_date =
     date.getFullYear() + "-" + (date.getMonth() + 1) + "-" + date.getDate();
 
-  // console.log(now_date)
-
-  // 파이어베이스에 데이터 추가
   const createList = () => {
-    // addDoc(DB 연결 객체, 저장할 데이터)
     addDoc(yumsCollectionRef, {
       content: newList,
       d_date: now_date,
-      // 최신 글 순으로 출력될 수 있도록 timeStamp 추가
       timeStamp: date,
     });
     setNewList("");
+    setSelectedAddress("");
     setChanged(true);
   };
 
   const updateList = async (id, content) => {
-    // console.log(id,"/",content)
     const msg = prompt("내용 수정", content);
 
     if (msg) {
-      // id를 이용하여 데이터베이스에서 수정할 데이터 검색
-      //doc("데이터베이스", "콜렉션", 검색할 key(id))
       const listDoc = doc(db, "yums", id);
 
-      // 수정할 데이터
       const editData = {
         content: msg,
         d_date: now_date,
@@ -300,7 +279,6 @@ function Yumpage() {
         imageUrl: imageUrl,
       };
 
-      // updateDoc(변경될 데이터, 수정할 데이터)
       await updateDoc(listDoc, editData);
       setNewList("");
       setImageUrl("");
@@ -308,14 +286,12 @@ function Yumpage() {
     }
   };
 
-  // 삭제
   const deleteList = async (id) => {
     var del_ck = window.confirm("정말 삭제하시겠습니까?");
 
     if (del_ck) {
       const listDoc = doc(db, "yums", id);
 
-      // deleteDoc(삭제할 데이터)
       await deleteDoc(listDoc);
       setChanged(true);
     }
@@ -324,28 +300,12 @@ function Yumpage() {
   const handleInputKeyPress = (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      createList();
+      const contentWithAddress = `${newList} - ${selectedAddress}`;
+      createList(contentWithAddress);
     }
   };
 
-  const handleImageUpload = async (event) => {
-    const file = event.target.files[0];
-    if (file) {
-      // Upload the file to Firebase Storage
-      const storageRef = storage.ref();
-      const fileRef = storageRef.child(file.name);
-      await fileRef.put(file);
-
-      // Get the download URL of the uploaded file
-      const imageUrl = await fileRef.getDownloadURL();
-
-      // Set the imageUrl state
-      setImageUrl(imageUrl);
-
-      // Append the image URL to the text input
-      setNewList((prevText) => `${prevText} ![Image](${imageUrl})`); // Markdown image syntax
-    }
-  };
+  
 
   const showList = yums.map((value) => (
     <ListEntry key={value.id}>
@@ -353,7 +313,6 @@ function Yumpage() {
       <div className="list-date">
         <span className="d_date"> / {value.d_date}</span>
       </div>
-
       <ButtonContainer>
         <InputButton1
           onClick={() => {
@@ -370,19 +329,43 @@ function Yumpage() {
           삭제
         </InputButton2>
       </ButtonContainer>
-      {value.imageUrl && <img src={value.imageUrl} alt="Uploaded" />}
+ 
     </ListEntry>
   ));
 
+  const openPostcode = () => {
+    setPostcodeOpen(true);
+
+    console.log("postcodeOpen : "+ postcodeOpen);
+  };
+
+  const closePostcode = () => {
+    setPostcodeOpen(false);
+  };
+
+  const handleAddress = (data) => {
+    console.log("data : "+data);
+    const { address } = data;
+    setSelectedAddress(address);
+    console.log(address);
+    closePostcode();
+  };
+
+  const onToggle = () => setOpen(!open);
+
   return (
+    <div>
     <YumTemplate>
       <GlobalStyle />
       <YumHead />
+        <div>
+        <div>{selectedAddress}</div>
+      </div>
       <ListContainer>{showList}</ListContainer>
       <CircleButton open={open} onClick={onToggle}>
         <MdAdd />
       </CircleButton>
-      {open && ( // Conditionally render the form if open is true
+      {open && (
         <InsertFormPositioner>
           <InsertFormp>
             <TextArea
@@ -399,30 +382,32 @@ function Yumpage() {
                 alignItems: "center",
               }}
             >
-              <InputButton3 type="button" onClick={createList}>
+             
+              <InputButton3 type="button" onClick={openPostcode}>
                 주소검색
               </InputButton3>
-              <InputButton4 as="label" htmlFor="imageInput">
+              <InputButton4 htmlFor="imageInput">
                 사진첨부
               </InputButton4>
               <InputButton5 type="button" onClick={createList}>
                 등록
               </InputButton5>
-              <input
-                type="file"
-                id="imageInput"
-                accept="image/*"
-                style={{ display: "none" }}
-                onChange={handleImageUpload}
-              />
             </div>
-            {imageUrl && <img src={imageUrl} alt="Uploaded" />}{" "}
-            {/* Display uploaded image */}
+            <div>
+            {postcodeOpen && (
+              <AddressSearch
+                onComplete={handleAddress}
+                isOpen={postcodeOpen}
+                onClose={closePostcode}
+              />
+            )}</div>
           </InsertFormp>
         </InsertFormPositioner>
       )}
-    </YumTemplate>
+      </YumTemplate>
+    </div>
   );
 }
+
 
 export default Yumpage;

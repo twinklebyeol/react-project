@@ -1,5 +1,8 @@
 import { initializeApp } from "firebase/app";
 import { getFirestore } from "@firebase/firestore";
+import { getStorage } from "firebase/storage"; // Import getStorage for Firebase Storage
+import "firebase/storage";
+
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
@@ -16,7 +19,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 
 export const db = getFirestore(app);
-export const storage = getFirestore(app);
+export const storage = getStorage(app); // Initialize Firebase Storage using getStorage
 
 export const saveTodoToFirebase = async (todo) => {
   try {
